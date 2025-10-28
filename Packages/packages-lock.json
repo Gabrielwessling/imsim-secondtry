@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.qformats.qnity": {
+      "version": "https://github.com/QFormatPlugins/QNity.git?path=/com.qformats.qnity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "18456641ec5a248f3e04db1c82b18dc4eb8d6ac6"
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.8",
       "depth": 0,
@@ -45,15 +52,6 @@
       "source": "builtin",
       "dependencies": {}
     },
-    "com.unity.ide.rider": {
-      "version": "3.0.36",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.ext.nunit": "1.0.6"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.ide.visualstudio": {
       "version": "2.0.23",
       "depth": 0,
@@ -78,14 +76,6 @@
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
-    },
-    "com.unity.multiplayer.center": {
-      "version": "1.0.0",
-      "depth": 0,
-      "source": "builtin",
-      "dependencies": {
-        "com.unity.modules.uielements": "1.0.0"
-      }
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.5",
