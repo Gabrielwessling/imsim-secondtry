@@ -3,77 +3,75 @@ using Q3Movement;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(CharacterEvents))]
 public class Health : MonoBehaviour
 {
     [SerializeField] private float maxHealth = 100f;
     public float GetMaxHealth() => maxHealth;
+
     [SerializeField] private float currentHealth;
     public float GetCurrentHealth() => currentHealth;
 
-    [SerializeField] private AudioClip[] damageSound;
-    [SerializeField] private AudioClip[] deathSound;
-    
     [SerializeField] private Image damageOverlay;
     [SerializeField] private float fadeDuration = 0.5f;
+    [SerializeField] private float overlayAlphaOnDamage = 0.5f;
 
     private Coroutine fadeRoutine;
+    private CharacterEvents eventsRef;
+    private bool isDead;
+
+    void Awake()
+    {
+        eventsRef = GetComponent<CharacterEvents>();
+    }
 
     void Start()
     {
         currentHealth = maxHealth;
+        isDead = currentHealth <= 0f;
     }
 
+    /// <summary>
+    /// amount > 0 heals, amount < 0 damage
+    /// </summary>
     public void ChangeHealth(float amount)
     {
-        if (currentHealth <= 0 && amount < 0)
-            return; // Já está morto, não aplica mais dano
-        currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
+        // se já está morto e recebe mais dano, ignora
+        if (isDead && amount < 0f) return;
+
+        float prev = currentHealth;
+        currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
+
         Debug.Log($"{gameObject.name} health changed by {amount}. Current health: {currentHealth}");
 
-        if (amount < 0)
-            DamageEffect();
-
-        if (currentHealth <= 0)
+        // dano: efeito visual + emitir evento
+        if (amount < 0f)
         {
-            currentHealth = 0;
-            DeathEffect();
+            StartDamageOverlay();
+            eventsRef.EmitHurt(Mathf.Abs(amount));
+        }
+
+        // morte (entra somente uma vez)
+        if (!isDead && currentHealth <= 0f)
+        {
+            isDead = true;
+            currentHealth = 0f;
             DeathSetup();
+            eventsRef.EmitDie();
         }
     }
 
-    void DeathSetup()
+    #region Visual Effects (overlay)
+    void StartDamageOverlay()
     {
-        Debug.Log($"{gameObject.name} has died.");
+        if (damageOverlay == null) return;
 
-        gameObject.GetComponent<Collider>().enabled = false;
-        gameObject.GetComponent<CharacterController>().enabled = false;
-        gameObject.GetComponent<Health>().enabled = false;
-        gameObject.GetComponent<Q3PlayerController>().enabled = false;
-        gameObject.transform.position = new Vector3(gameObject.transform.position.x, 0, gameObject.transform.position.z);
-    }
+        // Reinicia o overlay pra uma cor vermelha com alpha configurado
+        Color baseColor = damageOverlay.color;
+        damageOverlay.color = new Color(0.7f, 0f, 0f, overlayAlphaOnDamage);
 
-    void DeathEffect()
-    {
-        if (deathSound != null)
-            AudioSource.PlayClipAtPoint(deathSound[Random.Range(0, deathSound.Length - 1)], transform.position);
-    }
-
-    void DamageEffect()
-    {
-        if (damageSound != null)
-            AudioSource.PlayClipAtPoint(damageSound[Random.Range(0, damageSound.Length - 1)], transform.position);
-
-        if (damageOverlay != null)
-        {
-            // Reinicia o overlay pra 50% opaco vermelho
-            damageOverlay.color = new Color(0.7f, 0, 0, 0.5f);
-
-            // Se já tiver uma animação de fade rodando, para ela
-            if (fadeRoutine != null)
-                StopCoroutine(fadeRoutine);
-
-            fadeRoutine = StartCoroutine(FadeOverlay());
-        }
+        if (fadeRoutine != null) StopCoroutine(fadeRoutine);
+        fadeRoutine = StartCoroutine(FadeOverlay());
     }
 
     IEnumerator FadeOverlay()
@@ -91,5 +89,25 @@ public class Health : MonoBehaviour
 
         damageOverlay.color = endColor;
         fadeRoutine = null;
+    }
+    #endregion
+
+    void DeathSetup()
+    {
+        Debug.Log($"{gameObject.name} has died.");
+
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        var cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        // desliga scripts relevantes de controle
+        var q3 = GetComponent<Q3PlayerController>();
+        if (q3 != null) q3.enabled = false;
+
+        this.enabled = false;
+
+        transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
     }
 }

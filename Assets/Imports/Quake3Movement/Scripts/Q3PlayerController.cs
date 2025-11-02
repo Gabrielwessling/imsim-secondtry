@@ -58,6 +58,18 @@ namespace Q3Movement
         private Transform m_Tran;
         private Transform m_CamTran;
 
+    #region step sounds
+        [SerializeField] private float stepDistance = 2f;        // distância entre passos (ajusta)
+        [SerializeField] private float minStepSpeed = 0.2f;      // velocidade mínima para gerar passos
+        [SerializeField] private float stepRayLength = 1.5f;     // para detectar solo abaixo do jogador
+        [SerializeField] private LayerMask groundMask = ~0;      // quem conta como chão (opcional)
+
+        private Vector3 _lastPosition;
+        private float _stepAccumulator;
+        private bool _leftFootNext = true;
+        private CharacterEvents _eventsRef;
+    #endregion
+
         private void Start()
         {
             m_Tran = transform;
@@ -68,12 +80,15 @@ namespace Q3Movement
 
             m_CamTran = m_Camera.transform;
             m_MouseLook.Init(m_Tran, m_CamTran);
+
+            _lastPosition = transform.position;
+            _eventsRef = GetComponent<CharacterEvents>(); // garante que o GameObject tem CharacterEvents
         }
 
         private void Update()
         {
             m_MoveInput = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-            m_MouseLook.UpdateCursorLock();    
+            m_MouseLook.UpdateCursorLock();
             QueueJump();
 
             // Set movement state.
@@ -91,7 +106,57 @@ namespace Q3Movement
 
             // Move the character.
             m_Character.Move(m_PlayerVelocity * Time.deltaTime);
+            HandleFootsteps();
         }
+        
+        private void HandleFootsteps()
+        {
+            // só quando estiver no chão
+            if (!m_Character.isGrounded)
+            {
+                _lastPosition = transform.position;
+                return;
+            }
+
+            // deslocamento horizontal desde o último frame
+            Vector3 delta = transform.position - _lastPosition;
+            float horizDist = new Vector3(delta.x, 0f, delta.z).magnitude;
+
+            // velocidade horizontal atual (usando a velocity que já tens)
+            float horizSpeed = new Vector3(m_PlayerVelocity.x, 0f, m_PlayerVelocity.z).magnitude;
+            if (horizSpeed < minStepSpeed)
+            {
+                _lastPosition = transform.position;
+                return;
+            }
+
+            _stepAccumulator += horizDist;
+
+            if (_stepAccumulator >= stepDistance)
+            {
+                _stepAccumulator = 0f;
+
+                // detecta superficie (opcional). Mapeia pra um int se tu já tem sistema de surfaces.
+                int surfaceId = 0;
+                RaycastHit hit;
+                Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
+                if (Physics.Raycast(rayOrigin, Vector3.down, out hit, stepRayLength, groundMask))
+                {
+                    // exemplo: se tu tiver um componente SurfaceType no collider, pega id dele
+                    // if (hit.collider.TryGetComponent<SurfaceType>(out var st)) surfaceId = st.id;
+                    // caso contrário, pode mapear por tag/layer/nome do material aqui
+                }
+
+                // emite evento pro AudioBrain
+                _eventsRef?.EmitFootstep(surfaceId);
+
+                // opcional: alterna pé (se quiser usar para animation/variação)
+                _leftFootNext = !_leftFootNext;
+            }
+
+            _lastPosition = transform.position;
+        }
+
 
         // Queues the next jump.
         private void QueueJump()
