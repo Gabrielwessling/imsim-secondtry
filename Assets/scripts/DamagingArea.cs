@@ -6,11 +6,11 @@ public class DamagingArea : MonoBehaviour
     [SerializeField] private float damagePerSecond = 10f;
     [SerializeField] private float tickInterval = 1f; // tempo entre danos
 
-    private Dictionary<Health, float> damageTimers = new();
+    private Dictionary<IHealth, float> damageTimers = new();
 
     void OnTriggerStay(Collider other)
     {
-        Health health = other.GetComponent<Health>();
+        IHealth health = other.GetComponent<IHealth>();
         if (health == null) return;
 
         if (!damageTimers.ContainsKey(health))
@@ -28,7 +28,7 @@ public class DamagingArea : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        Health health = other.GetComponent<Health>();
+        IHealth health = other.GetComponent<IHealth>();
         if (health != null)
             damageTimers.Remove(health);
     }

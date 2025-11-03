@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterEvents))]
-public class Health : MonoBehaviour
+public class Health : MonoBehaviour, IHealth
 {
     [SerializeField] private float maxHealth = 100f;
     public float GetMaxHealth() => maxHealth;
@@ -31,12 +31,8 @@ public class Health : MonoBehaviour
         isDead = currentHealth <= 0f;
     }
 
-    /// <summary>
-    /// amount > 0 heals, amount < 0 damage
-    /// </summary>
     public void ChangeHealth(float amount)
     {
-        // se já está morto e recebe mais dano, ignora
         if (isDead && amount < 0f) return;
 
         float prev = currentHealth;
