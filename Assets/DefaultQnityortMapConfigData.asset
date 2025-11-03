@@ -15,7 +15,7 @@ MonoBehaviour:
   inverseScale: 24
   generateLightMapUV: 0
   defaultBaseMaterial: {fileID: 2100000, guid: 6734b60aa8efd433695e2063320b53a2, type: 2}
-  textureFolder: Assets/2D_textures/
+  textureFolder: Assets/textures/
   materialFolder: Assets/2D_materials/
   clipTexture: clip
   skipTexture: skip

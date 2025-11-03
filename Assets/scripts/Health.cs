@@ -92,6 +92,12 @@ public class Health : MonoBehaviour, IHealth
     {
         Debug.Log($"{gameObject.name} has died.");
 
+        foreach (var weapon in GetComponentsInChildren<Weapon>())
+        {
+            weapon.enabled = false;
+            weapon.gameObject.SetActive(false);
+        }
+
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
@@ -104,6 +110,6 @@ public class Health : MonoBehaviour, IHealth
 
         this.enabled = false;
 
-        transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
+        transform.position = new Vector3(transform.position.x, transform.position.y -2, transform.position.z);
     }
 }
