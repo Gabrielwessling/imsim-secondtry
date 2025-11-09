@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: com.qformats.qnity.runtime::Qnity.QnityMapConfigData
   inverseScale: 24
   generateLightMapUV: 0
-  defaultBaseMaterial: {fileID: 2100000, guid: 6734b60aa8efd433695e2063320b53a2, type: 2}
+  defaultBaseMaterial: {fileID: 2100000, guid: 63f16ddfa8109347cbebcc3aa54dc90c, type: 2}
   textureFolder: Assets/textures/
   materialFolder: Assets/2D_materials/
   clipTexture: clip
