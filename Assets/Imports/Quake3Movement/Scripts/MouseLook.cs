@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Q3Movement
@@ -18,6 +19,8 @@ namespace Q3Movement
         [SerializeField] private float m_SmoothTime = 5f;
         [SerializeField] private bool m_LockCursor = true;
 
+        public bool canMove = true;
+
         private Quaternion m_CharacterTargetRot;
         private Quaternion m_CameraTargetRot;
         private bool m_cursorIsLocked = true;
@@ -30,6 +33,11 @@ namespace Q3Movement
 
         public void LookRotation(Transform character, Transform camera)
         {
+            if (!canMove)
+            {
+                return;
+            }
+
             float yRot = Input.GetAxis("Mouse X") * m_XSensitivity;
             float xRot = Input.GetAxis("Mouse Y") * m_YSensitivity;
 

@@ -17,12 +17,22 @@ public class Character : MonoBehaviour
     public LayerMask interactMask = ~0;       // which layers to raycast against
     private IInteractable focusedInteractable;
     public GameObject interactionSpriteUI;
+    [SerializeField] private Q3Movement.Q3PlayerController playerController;
+
+    private bool canMove = true;
 
     void Awake()
     {
         weaponSystem = GetComponentInChildren<WeaponSystem>();
         if (playerCamera == null)
             playerCamera = Camera.main;
+    }
+
+    public void SetCanMove(bool value)
+    {
+        canMove = value;
+        // Also disable mouse look if applicable
+        playerController.canMove = value;
     }
 
     void Update()

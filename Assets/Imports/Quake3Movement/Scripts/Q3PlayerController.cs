@@ -23,6 +23,8 @@ namespace Q3Movement
             }
         }
 
+        public bool canMove = true;
+
         [Header("Aiming")]
         [SerializeField] private Camera m_Camera;
         [SerializeField] private MouseLook m_MouseLook = new MouseLook();
@@ -87,6 +89,14 @@ namespace Q3Movement
 
         private void Update()
         {
+            if (!canMove)
+            {
+                m_MouseLook.SetCursorLock(false);
+                return;
+            } else
+            {
+                m_MouseLook.SetCursorLock(true);
+            }
             m_MoveInput = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
             m_MouseLook.UpdateCursorLock();
             QueueJump();
